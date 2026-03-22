@@ -1,0 +1,49 @@
+# Custom LoRA Configuration (fp16 baseline)
+experiment_name: "lora_custom"
+method: "lora"  # Uses custom LoRA implementation
+
+# Model
+model_name: "deepseek-ai/deepseek-coder-1.3b-instruct"
+
+# LoRA hyperparameters
+lora:
+  r: 64
+  alpha: 128
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+# Training hyperparameters
+training:
+  block_size: 1024
+  batch_size: 4
+  grad_accum_steps: 4
+  lr: 0.0003
+  warmup_steps: 100
+  max_steps: 20001
+  gradient_clip: 1.0
+  eval_steps: 1000
+  save_steps: 5000
+  logging_steps: 100
+
+# Data
+data:
+  train_shards: ["finetune_shards/shard_train.npy"]
+  val_shard: "finetune_shards/shard_val.npy"
+
+# Optimization
+optimizer:
+  type: "AdamW"
+  lr: 0.0003
+  weight_decay: 0.01
+
+scheduler:
+  type: "linear_warmup"
+  warmup_steps: 100
+
+# Logging
+wandb:
+  entity: "yashuatla6-individual"
+  project: "code-finetuning-comparison"
+  tags: ["lora", "custom", "baseline"]
+
+# Output
+output_dir: "experiments/lora_custom"

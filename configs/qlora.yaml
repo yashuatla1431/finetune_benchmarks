@@ -1,0 +1,57 @@
+# QLoRA Configuration (4-bit NF4 + PEFT LoRA)
+experiment_name: "qlora_nf4"
+method: "qlora"  # Uses bitsandbytes 4-bit + PEFT LoRA
+
+# Model
+model_name: "deepseek-ai/deepseek-coder-1.3b-instruct"
+
+# Quantization (bitsandbytes)
+quantization:
+  bits: 4
+  quant_type: "nf4"  # Normal Float 4
+  compute_dtype: "bfloat16"
+
+# LoRA hyperparameters (PEFT)
+lora:
+  r: 64
+  alpha: 128
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  dropout: 0.1
+  bias: "none"
+
+# Training hyperparameters
+training:
+  block_size: 1024
+  batch_size: 4
+  grad_accum_steps: 4
+  lr: 0.0002  # Recommended for QLoRA
+  warmup_steps: 100
+  max_steps: 20001
+  gradient_clip: 1.0
+  eval_steps: 1000
+  save_steps: 5000
+  logging_steps: 100
+
+# Data
+data:
+  train_shards: ["finetune_shards/shard_train.npy"]
+  val_shard: "finetune_shards/shard_val.npy"
+
+# Optimization
+optimizer:
+  type: "AdamW"
+  lr: 0.0002
+  weight_decay: 0.01
+
+scheduler:
+  type: "linear_warmup"
+  warmup_steps: 100
+
+# Logging
+wandb:
+  entity: "yashuatla6-individual"
+  project: "code-finetuning-comparison"
+  tags: ["qlora", "4bit", "peft"]
+
+# Output
+output_dir: "experiments/qlora_nf4"
