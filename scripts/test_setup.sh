@@ -12,14 +12,14 @@ echo "to verify everything works correctly."
 echo ""
 
 # Check if data exists
-if [ ! -f "finetune_shards/shard_train.npy" ]; then
-    echo "ERROR: finetune_shards/shard_train.npy not found!"
+if [ ! -f "finetune_shards/shard_train.npz" ]; then
+    echo "ERROR: finetune_shards/shard_train.npz not found!"
     echo "Please create training data first using ft_dataset.py"
     exit 1
 fi
 
-if [ ! -f "finetune_shards/shard_val.npy" ]; then
-    echo "ERROR: finetune_shards/shard_val.npy not found!"
+if [ ! -f "finetune_shards/shard_val.npz" ]; then
+    echo "ERROR: finetune_shards/shard_val.npz not found!"
     echo "Please create validation data first using ft_dataset.py"
     exit 1
 fi
