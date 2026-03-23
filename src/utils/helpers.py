@@ -47,7 +47,7 @@ def test_inference(model, tokenizer, device, prompt=None):
     Generate sample output for qualitative evaluation.
 
     Args:
-        model: Model to use for generation
+        model: Model to use for generation (possibly wrapped in DDP)
         tokenizer: Tokenizer for encoding/decoding
         device: Device to run on
         prompt: Optional custom prompt
@@ -66,10 +66,17 @@ def test_inference(model, tokenizer, device, prompt=None):
 
     input_ids = tokenizer.encode(prompt, return_tensors='pt').to(device)
 
-    generated = model.generate(
+    # Handle DDP wrapped models
+    model_unwrapped = model.module if hasattr(model, 'module') else model
+
+    generated = model_unwrapped.generate(
         input_ids,
         max_new_tokens=100,
+        do_sample=True,
         temperature=0.8,
+        top_p=0.9,
+        repetition_penalty=1.3,
+        no_repeat_ngram_size=4,
         eos_token_id=tokenizer.eos_token_id,
         pad_token_id=tokenizer.pad_token_id
     )

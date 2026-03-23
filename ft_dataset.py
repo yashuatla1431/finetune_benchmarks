@@ -1,9 +1,10 @@
-import tiktoken
-enc = tiktoken.get_encoding('gpt2')
-
-
+from transformers import AutoTokenizer
 from datasets import load_dataset
 from tqdm import tqdm
+
+# Use DeepSeek tokenizer instead of GPT-2
+model_name = "deepseek-ai/deepseek-coder-1.3b-instruct"
+enc = AutoTokenizer.from_pretrained(model_name)
 
 dataset = load_dataset("sahil2801/CodeAlpaca-20k",streaming=True,split='train')
 
@@ -12,6 +13,21 @@ pbar = tqdm(total=2*(10**4),desc="Rows processed")
 i = 0
 train_tokens = []
 val_tokens = []
+labels_train_tokens = []
+labels_val_tokens = []
+
+def mask_train(tokens_ls):
+    labels_ls = tokens_ls.copy()
+    break_point = enc.encode("##Response:",add_special_tokens=False)
+    print(break_point)
+    sub_len = len(break_point)
+    sub_index = 0
+    for i in range(len(tokens_ls)-sub_len):
+        if tokens_ls[i:i+sub_len] == break_point:
+            sub_index = i+sub_len
+    for i in range(sub_index):
+        labels_ls[i] = -100
+    return labels_ls
 
 for obj in dataset:
     instruction = obj['instruction']
@@ -24,23 +40,29 @@ for obj in dataset:
     else:
         train_exp = f"##Human:{instruction}\n\n##Response:{output}"
 
-    tokens_np = enc.encode(train_exp)
-    tokens_np.append(enc._special_tokens['<|endoftext|>'])
+    tokens_ls = enc.encode(train_exp, add_special_tokens=False)
+    labels_ls = mask_train(tokens_ls)
+    tokens_ls.append(enc.eos_token_id)
+    labels_ls.append(enc.eos_token_id)
 
     # Split: every 5th example goes to validation (20% split)
     if i % 5 == 0:
-        val_tokens.extend(tokens_np)
+        labels_val_tokens.extend(labels_ls)
+        val_tokens.extend(tokens_ls)
     else:
-        train_tokens.extend(tokens_np)
+        labels_train_tokens.extend(labels_ls)
+        train_tokens.extend(tokens_ls)
 
     i += 1
     pbar.update(1)
 
 train_tokens_np = np.array(train_tokens)
 val_tokens_np = np.array(val_tokens)
+labels_train_tokens_np = np.array(labels_train_tokens)
+labels_val_tokens_np = np.array(labels_val_tokens)
 
-np.save('finetune_shards/shard_train.npy', train_tokens_np)
-np.save('finetune_shards/shard_val.npy', val_tokens_np)
+np.savez('finetune_shards/shard_train.npz', tokens=train_tokens_np,labels=labels_train_tokens_np)
+np.savez('finetune_shards/shard_val.npz', tokens=val_tokens_np,labels=labels_val_tokens_np)
 
 print(f"\nTrain tokens: {len(train_tokens_np)}")
 print(f"Val tokens: {len(val_tokens_np)}")

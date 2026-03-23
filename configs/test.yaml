@@ -1,15 +1,24 @@
 # Quick test configuration (runs in ~5 minutes)
 experiment_name: "test_run"
-method: "lora"  # Test with simplest method first
+method: "qlora"  # Test QLoRA with bitsandbytes + PEFT
 
 # Model
 model_name: "deepseek-ai/deepseek-coder-1.3b-instruct"
 
-# LoRA hyperparameters
+# Quantization (bitsandbytes)
+quantization:
+  bits: 4
+  quant_type: "nf4"
+  compute_dtype: "bfloat16"
+
+# LoRA hyperparameters (PEFT)
 lora:
   r: 8  # Smaller rank for faster testing
   alpha: 16
-  target_modules: ["q_proj", "v_proj"]  # Only 2 modules instead of 4
+  dropout: 0.1
+  target_modules: ["q_proj", "v_proj", "gate_proj", "up_proj"]  # Reduced for testing
+  dropout: 0.1
+  bias: "none"
 
 # Training hyperparameters (MINIMAL for testing)
 training:
@@ -26,8 +35,9 @@ training:
 
 # Data
 data:
-  train_shards: ["finetune_shards/shard_train.npy"]
-  val_shard: "finetune_shards/shard_val.npy"
+  train_shards: ["finetune_shards/shard_train"]
+  val_shard: "finetune_shards/shard_val"
+  use_label_masking: true
 
 # Optimization
 optimizer:

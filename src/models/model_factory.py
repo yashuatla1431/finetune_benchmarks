@@ -43,7 +43,7 @@ def apply_custom_lora(model, lora_config):
 
     Args:
         model: Model to apply LoRA to
-        lora_config: Dict with keys: r, alpha, target_modules
+        lora_config: Dict with keys: r, alpha, target_modules, dropout (optional)
 
     Returns:
         Model with LoRA layers
@@ -51,6 +51,7 @@ def apply_custom_lora(model, lora_config):
     r = lora_config['r']
     alpha = lora_config['alpha']
     target_modules = lora_config['target_modules']
+    dropout = lora_config.get('dropout', 0.0)
 
     # Freeze all original parameters
     for param in model.parameters():
@@ -62,12 +63,21 @@ def apply_custom_lora(model, lora_config):
     # Apply LoRA to specified modules in each layer
     for i in range(num_layers):
         for module_name in target_modules:
-            original_layer = getattr(model.model.layers[i].self_attn, module_name)
-            setattr(
-                model.model.layers[i].self_attn,
-                module_name,
-                LoraLayer(original_layer, r=r, alpha=alpha)
-            )
+            # Check if module is in self_attn or mlp
+            if hasattr(model.model.layers[i].self_attn, module_name):
+                original_layer = getattr(model.model.layers[i].self_attn, module_name)
+                setattr(
+                    model.model.layers[i].self_attn,
+                    module_name,
+                    LoraLayer(original_layer, r=r, alpha=alpha, dropout=dropout)
+                )
+            elif hasattr(model.model.layers[i].mlp, module_name):
+                original_layer = getattr(model.model.layers[i].mlp, module_name)
+                setattr(
+                    model.model.layers[i].mlp,
+                    module_name,
+                    LoraLayer(original_layer, r=r, alpha=alpha, dropout=dropout)
+                )
 
     return model
 

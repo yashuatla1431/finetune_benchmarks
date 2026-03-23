@@ -21,21 +21,24 @@ echo ""
 # Experiment 1: Custom LoRA
 echo "[1/3] Starting Custom LoRA experiment..."
 echo "Started at: $(date)"
-python scripts/train.py --config configs/lora.yaml 2>&1 | tee experiments/lora_custom/training.log
+mkdir -p experiments/lora_custom
+torchrun --nproc_per_node=1 scripts/train.py --config configs/lora.yaml 2>&1 | tee experiments/lora_custom/training.log
 echo "Finished at: $(date)"
 echo ""
 
 # Experiment 2: 8-bit LoRA
 echo "[2/3] Starting 8-bit LoRA experiment..."
 echo "Started at: $(date)"
-python scripts/train.py --config configs/lora_8bit.yaml 2>&1 | tee experiments/lora_8bit_custom/training.log
+mkdir -p experiments/lora_8bit_custom
+torchrun --nproc_per_node=1 scripts/train.py --config configs/lora_8bit.yaml 2>&1 | tee experiments/lora_8bit_custom/training.log
 echo "Finished at: $(date)"
 echo ""
 
 # Experiment 3: QLoRA
 echo "[3/3] Starting QLoRA experiment..."
 echo "Started at: $(date)"
-python scripts/train.py --config configs/qlora.yaml 2>&1 | tee experiments/qlora_nf4/training.log
+mkdir -p experiments/qlora_nf4
+torchrun --nproc_per_node=1 scripts/train.py --config configs/qlora.yaml 2>&1 | tee experiments/qlora_nf4/training.log
 echo "Finished at: $(date)"
 echo ""
 

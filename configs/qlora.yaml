@@ -13,9 +13,9 @@ quantization:
 
 # LoRA hyperparameters (PEFT)
 lora:
-  r: 64
-  alpha: 128
-  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  r: 16
+  alpha: 32
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
   dropout: 0.1
   bias: "none"
 
@@ -24,24 +24,25 @@ training:
   block_size: 1024
   batch_size: 4
   grad_accum_steps: 4
-  lr: 0.0002  # Recommended for QLoRA
+  lr: 0.0001
   warmup_steps: 100
-  max_steps: 20001
+  max_steps: 3001
   gradient_clip: 1.0
-  eval_steps: 1000
-  save_steps: 5000
+  eval_steps: 500
+  save_steps: 1500
   logging_steps: 100
 
 # Data
 data:
-  train_shards: ["finetune_shards/shard_train.npy"]
-  val_shard: "finetune_shards/shard_val.npy"
+  train_shards: ["finetune_shards/shard_train"]
+  val_shard: "finetune_shards/shard_val"
+  use_label_masking: true
 
 # Optimization
 optimizer:
   type: "AdamW"
-  lr: 0.0002
-  weight_decay: 0.01
+  lr: 0.0001
+  weight_decay: 0.1
 
 scheduler:
   type: "linear_warmup"

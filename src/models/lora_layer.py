@@ -17,7 +17,7 @@ class LoraLayer(nn.Module):
         alpha: LoRA scaling factor
     """
 
-    def __init__(self, original_layer, r=8, alpha=16):
+    def __init__(self, original_layer, r=8, alpha=16, dropout=0.0):
         super().__init__()
         self.original_layer = original_layer
         self.alpha = alpha
@@ -37,6 +37,9 @@ class LoraLayer(nn.Module):
         self.loraA = nn.Parameter(torch.randn(r, in_features, device=device) / self.r)
         self.loraB = nn.Parameter(torch.zeros(out_features, r, device=device))
 
+        # Dropout for regularization
+        self.dropout = nn.Dropout(p=dropout) if dropout > 0 else None
+
     def forward(self, x):
         """
         Forward pass: original output + scaled LoRA adaptation.
@@ -46,8 +49,10 @@ class LoraLayer(nn.Module):
         # Original layer output
         out = self.original_layer(x)
 
-        # LoRA adaptation: x @ A^T @ B^T
-        act = x @ (self.loraA.T @ self.loraB.T)
+        # LoRA adaptation: x @ A^T @ B^T (cast to input dtype)
+        lora_input = self.dropout(x) if self.dropout else x
+        lora_weight = (self.loraA.T @ self.loraB.T).to(x.dtype)
+        act = lora_input @ lora_weight
         scaled_act = (self.alpha / self.r) * act
 
         return out + scaled_act

@@ -20,9 +20,7 @@ class Int8Linear(nn.Module):
     def __init__(self, original_layer, block_size=64):
         super().__init__()
         self.block_size = block_size
-        self.quantized_weights = None
         self.bias = original_layer.bias
-        self.scale_values = None
         self.quantize(original_layer.weight.data)
 
     @property
@@ -83,6 +81,6 @@ class Int8Linear(nn.Module):
         # Unpad and reshape to original shape
         param = blocks.flatten()[:original_numel].view(original_shape)
 
-        # Store quantized weights and scales
-        self.quantized_weights = param
-        self.scale_values = scale_values
+        # Store quantized weights and scales as buffers (keeps device consistency)
+        self.register_buffer('quantized_weights', param)
+        self.register_buffer('scale_values', scale_values)

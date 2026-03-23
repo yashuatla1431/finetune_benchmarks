@@ -50,17 +50,20 @@ class Trainer:
 
         # Data
         data_cfg = config['data']
+        use_masking = data_cfg.get('use_label_masking', True)
         self.train_loader = DataLoader(
             data_cfg['train_shards'],
             self.batch_size,
             self.block_size,
             world_size,
-            rank
+            rank,
+            use_masking
         )
         self.val_loader = ValLoader(
             data_cfg['val_shard'],
             self.batch_size,
-            self.block_size
+            self.block_size,
+            use_masking
         )
 
         # Optimizer
@@ -178,22 +181,36 @@ class Trainer:
                 print(f"Sample Generation:\n{inference_result}\n")
 
                 if 'wandb' in self.config:
-                    wandb.log({
+                    log_dict = {
                         "train/loss": avg_loss,
                         "val/loss": val_loss,
                         "val/perplexity": perplexity,
                         "lr": self.scheduler.get_last_lr()[0],
                         "step": step
-                    })
+                    }
+
+                    # GPU memory stats
+                    if 'cuda' in self.device:
+                        log_dict["system/gpu_memory_allocated_gb"] = torch.cuda.memory_allocated(self.device) / 1024**3
+                        log_dict["system/gpu_memory_reserved_gb"] = torch.cuda.memory_reserved(self.device) / 1024**3
+                        log_dict["system/gpu_memory_peak_gb"] = torch.cuda.max_memory_allocated(self.device) / 1024**3
+
+                    wandb.log(log_dict)
 
             # Regular logging
             if step % self.logging_steps == 0 and self.rank == 0:
                 if 'wandb' in self.config:
-                    wandb.log({
+                    log_dict = {
                         "train/loss": avg_loss,
                         "lr": self.scheduler.get_last_lr()[0],
                         "step": step
-                    })
+                    }
+
+                    # GPU memory tracking every logging step
+                    if 'cuda' in self.device:
+                        log_dict["system/gpu_memory_allocated_gb"] = torch.cuda.memory_allocated(self.device) / 1024**3
+
+                    wandb.log(log_dict)
 
             # Save checkpoint
             if step > 0 and step % self.save_steps == 0 and self.rank == 0:
