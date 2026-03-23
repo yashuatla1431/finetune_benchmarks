@@ -81,7 +81,14 @@ def test_inference(model, tokenizer, device, prompt=None):
         pad_token_id=tokenizer.pad_token_id
     )
 
-    result = tokenizer.decode(generated[0], skip_special_tokens=True)
+    # Decode only the generated tokens (skip prompt)
+    prompt_length = input_ids.shape[1]
+    generated_tokens = generated[0][prompt_length:]
+    response = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+
+    # Format output with prompt and response
+    result = f"{prompt}\n{response}"
+
     model.train()
     return result
 
