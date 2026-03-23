@@ -6,10 +6,10 @@ from tqdm import tqdm
 model_name = "deepseek-ai/deepseek-coder-1.3b-instruct"
 enc = AutoTokenizer.from_pretrained(model_name)
 
-dataset = load_dataset("sahil2801/CodeAlpaca-20k",streaming=True,split='train')
+dataset = load_dataset("m-a-p/CodeFeedback-Filtered-Instruction", split='train')
 
 import numpy as np
-pbar = tqdm(total=2*(10**4),desc="Rows processed")
+pbar = tqdm(total=len(dataset), desc="Rows processed")
 i = 0
 train_tokens = []
 val_tokens = []
