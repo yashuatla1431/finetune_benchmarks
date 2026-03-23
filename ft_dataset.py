@@ -29,15 +29,15 @@ def mask_train(tokens_ls):
     return labels_ls
 
 for obj in dataset:
-    instruction = obj['instruction']
-    input = obj['input']
-    output = obj['output']
-    if not output.strip():
+    query = obj['query']
+    answer = obj['answer']
+
+    # Skip empty answers
+    if not answer.strip():
         continue
-    if input.strip():
-        train_exp = f"##Human:{instruction}\n{input}\n\n##Response:{output}"
-    else:
-        train_exp = f"##Human:{instruction}\n\n##Response:{output}"
+
+    # Format: query is the instruction, answer is the response
+    train_exp = f"##Human:{query}\n\n##Response:{answer}"
 
     tokens_ls = enc.encode(train_exp, add_special_tokens=False)
     labels_ls = mask_train(tokens_ls)
