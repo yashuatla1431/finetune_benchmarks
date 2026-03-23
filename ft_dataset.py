@@ -19,7 +19,6 @@ labels_val_tokens = []
 def mask_train(tokens_ls):
     labels_ls = tokens_ls.copy()
     break_point = enc.encode("##Response:",add_special_tokens=False)
-    print(break_point)
     sub_len = len(break_point)
     sub_index = 0
     for i in range(len(tokens_ls)-sub_len):
