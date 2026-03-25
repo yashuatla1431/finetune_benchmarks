@@ -6,7 +6,7 @@ import os
 import torch
 import torch.optim as optim
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.optim.lr_scheduler import LinearLR
+from torch.optim.lr_scheduler import LinearLR, CosineAnnealingLR, SequentialLR
 from tqdm import tqdm
 import wandb
 
@@ -139,6 +139,10 @@ class Trainer:
                 x, y = self.train_loader.get_batch()
                 x = x.to(self.device)
                 y = y.to(self.device)
+
+                # Skip batches where all labels are masked
+                if (y == -100).all():
+                    continue
 
                 # Mixed precision for CUDA
                 if 'cuda' in self.device:

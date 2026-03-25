@@ -17,7 +17,7 @@ training:
   block_size: 1024
   batch_size: 2
   grad_accum_steps: 8
-  lr: 0.0001
+  lr: 0.0003
   warmup_steps: 50
   max_steps: 500
   gradient_clip: 1.0
@@ -34,7 +34,7 @@ data:
 # Optimization
 optimizer:
   type: "AdamW"
-  lr: 0.0001
+  lr: 0.0003
   weight_decay: 0.1
 
 scheduler:
