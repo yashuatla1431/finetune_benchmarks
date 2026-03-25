@@ -2,11 +2,11 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 from tqdm import tqdm
 
-# Use DeepSeek tokenizer instead of GPT-2
-model_name = "deepseek-ai/deepseek-coder-1.3b-instruct"
+# Use Qwen tokenizer
+model_name = "Qwen/Qwen2.5-1.5B-Instruct"
 enc = AutoTokenizer.from_pretrained(model_name)
 
-dataset = load_dataset("m-a-p/CodeFeedback-Filtered-Instruction", split='train')
+dataset = load_dataset("databricks/databricks-dolly-15k", split='train')
 
 import numpy as np
 pbar = tqdm(total=len(dataset), desc="Rows processed")
@@ -29,15 +29,19 @@ def mask_train(tokens_ls):
     return labels_ls
 
 for obj in dataset:
-    query = obj['query']
-    answer = obj['answer']
+    instruction = obj['instruction']
+    response = obj['response']
+    context = obj.get('context', '')
 
-    # Skip empty answers
-    if not answer.strip():
+    # Skip empty responses
+    if not response.strip():
         continue
 
-    # Format: query is the instruction, answer is the response
-    train_exp = f"##Human:{query}\n\n##Response:{answer}"
+    # Format: instruction (with context if available) -> response
+    if context.strip():
+        train_exp = f"##Human:{instruction}\nContext:{context}\n\n##Response:{response}"
+    else:
+        train_exp = f"##Human:{instruction}\n\n##Response:{response}"
 
     tokens_ls = enc.encode(train_exp, add_special_tokens=False)
     labels_ls = mask_train(tokens_ls)

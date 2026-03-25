@@ -3,7 +3,7 @@ experiment_name: "qlora_nf4"
 method: "qlora"  # Uses bitsandbytes 4-bit + PEFT LoRA
 
 # Model
-model_name: "deepseek-ai/deepseek-coder-1.3b-instruct"
+model_name: "Qwen/Qwen2.5-1.5B-Instruct"
 
 # Quantization (bitsandbytes)
 quantization:
@@ -25,11 +25,11 @@ training:
   batch_size: 4
   grad_accum_steps: 4
   lr: 0.0001
-  warmup_steps: 100
-  max_steps: 6001
+  warmup_steps: 50
+  max_steps: 500
   gradient_clip: 1.0
-  eval_steps: 500
-  save_steps: 1500
+  eval_steps: 100
+  save_steps: 500
   logging_steps: 100
 
 # Data
@@ -46,13 +46,13 @@ optimizer:
 
 scheduler:
   type: "linear_warmup"
-  warmup_steps: 100
+  warmup_steps: 50
 
 # Logging
 wandb:
   entity: "yashuatla6-individual"
-  project: "code-finetuning-comparison"
-  tags: ["qlora", "4bit", "peft"]
+  project: "instruction-finetuning-comparison"
+  tags: ["qlora", "4bit", "peft", "qwen", "dolly"]
 
 # Output
 output_dir: "experiments/qlora_nf4"
