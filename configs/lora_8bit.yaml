@@ -28,7 +28,7 @@ training:
   gradient_clip: 1.0
   eval_steps: 100
   save_steps: 500
-  logging_steps: 100
+  logging_steps: 10
 
 # Data
 data:
