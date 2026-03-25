@@ -43,8 +43,8 @@ for obj in dataset:
     i += 1
     pbar.update(1)
 
-train_tokens_np = np.array(train_tokens, dtype=np.int32)
-val_tokens_np = np.array(val_tokens, dtype=np.int32)
+train_tokens_np = np.array(train_tokens)
+val_tokens_np = np.array(val_tokens)
 
 np.save('finetune_shards/shard_train.npy', train_tokens_np)
 np.save('finetune_shards/shard_val.npy', val_tokens_np)

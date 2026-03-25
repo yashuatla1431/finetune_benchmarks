@@ -11,15 +11,15 @@ echo "This will run 50 training steps (~5 min)"
 echo "to verify everything works correctly."
 echo ""
 
-# Check if data exists
-if [ ! -f "finetune_shards/shard_train.npz" ]; then
-    echo "ERROR: finetune_shards/shard_train.npz not found!"
+# Check if data exists (.npy format - no label masking)
+if [ ! -f "finetune_shards/shard_train.npy" ]; then
+    echo "ERROR: finetune_shards/shard_train.npy not found!"
     echo "Please create training data first using ft_dataset.py"
     exit 1
 fi
 
-if [ ! -f "finetune_shards/shard_val.npz" ]; then
-    echo "ERROR: finetune_shards/shard_val.npz not found!"
+if [ ! -f "finetune_shards/shard_val.npy" ]; then
+    echo "ERROR: finetune_shards/shard_val.npy not found!"
     echo "Please create validation data first using ft_dataset.py"
     exit 1
 fi

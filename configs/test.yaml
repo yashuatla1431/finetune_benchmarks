@@ -24,7 +24,7 @@ training:
   block_size: 1024
   batch_size: 2  # Smaller batch
   grad_accum_steps: 2
-  lr: 3e-4
+  lr: 0.00005
   warmup_steps: 10  # Very short warmup
   max_steps: 50  # Only 50 steps!
   gradient_clip: 1.0
@@ -36,13 +36,13 @@ training:
 data:
   train_shards: ["finetune_shards/shard_train"]
   val_shard: "finetune_shards/shard_val"
-  use_label_masking: true
+  use_label_masking: false
 
 # Optimization
 optimizer:
   type: "AdamW"
-  lr: 0.0003
-  weight_decay: 0.01
+  lr: 0.00005
+  weight_decay: 0.3
 
 scheduler:
   type: "linear_warmup"
