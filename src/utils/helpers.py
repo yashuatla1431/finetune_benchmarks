@@ -66,7 +66,7 @@ def test_inference(model, tokenizer, device, prompt=None):
     model.eval()
 
     if prompt is None:
-        prompt = '##Human:Why can camels survive for long without water?\n\n##Response:'
+        prompt = '##Human:For a car, what scams can be plotted with 0% financing vs rebate?\n\n##Response:'
 
     input_ids = tokenizer.encode(prompt, return_tensors='pt').to(device)
 
