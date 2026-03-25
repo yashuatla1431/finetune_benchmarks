@@ -58,11 +58,7 @@ def test_inference(model, tokenizer, device, prompt=None):
     model.eval()
 
     if prompt is None:
-        prompt = (
-            '##Human:Write a replace method for a string class which replaces '
-            'the given string with a given set of characters.\n'
-            'string = "Hello World!" replace_with = "Greetings!"\n\n##Response:'
-        )
+        prompt = '##Human:Why can camels survive for long without water?\n\n##Response:'
 
     input_ids = tokenizer.encode(prompt, return_tensors='pt').to(device)
 
