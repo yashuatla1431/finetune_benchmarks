@@ -12,8 +12,8 @@ quantization:
 
 # LoRA hyperparameters
 lora:
-  r: 16
-  alpha: 32
+  r: 8
+  alpha: 16
   dropout: 0.1
   target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
 
@@ -40,7 +40,7 @@ data:
 optimizer:
   type: "AdamW"
   lr: 0.0003
-  weight_decay: 0.1
+  weight_decay: 0.3
 
 scheduler:
   type: "linear_warmup"

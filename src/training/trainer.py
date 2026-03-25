@@ -74,13 +74,29 @@ class Trainer:
             weight_decay=opt_cfg.get('weight_decay', 0.01)
         )
 
-        # Scheduler
+        # Scheduler: warmup then cosine decay
         sched_cfg = config['scheduler']
+        warmup_steps = sched_cfg['warmup_steps']
+        peak_lr = opt_cfg['lr']
+
         if sched_cfg['type'] == 'linear_warmup':
-            self.scheduler = LinearLR(
+            # Warmup: 0.1*lr → lr over warmup_steps
+            warmup_scheduler = LinearLR(
                 self.optimizer,
                 start_factor=0.1,
-                total_iters=sched_cfg['warmup_steps']
+                total_iters=warmup_steps
+            )
+            # Cosine decay: lr → 0.1*lr over remaining steps
+            cosine_scheduler = CosineAnnealingLR(
+                self.optimizer,
+                T_max=self.max_steps - warmup_steps,
+                eta_min=peak_lr * 0.1
+            )
+            # Sequential: warmup then cosine
+            self.scheduler = SequentialLR(
+                self.optimizer,
+                schedulers=[warmup_scheduler, cosine_scheduler],
+                milestones=[warmup_steps]
             )
         else:
             raise ValueError(f"Unknown scheduler: {sched_cfg['type']}")
