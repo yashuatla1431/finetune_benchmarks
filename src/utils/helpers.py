@@ -28,6 +28,12 @@ def validate(model, loader, device):
         x, y = loader.get_batch()
         if x is None or y is None:
             break
+
+        # Skip batches where all labels are masked (-100)
+        # This happens with very long instructions spanning multiple batches
+        if (y == -100).all():
+            continue
+
         x = x.to(device)
         y = y.to(device)
         output = model(x, labels=y)
