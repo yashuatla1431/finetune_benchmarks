@@ -3,7 +3,7 @@ experiment_name: "test_run"
 method: "qlora"  # Test QLoRA with bitsandbytes + PEFT
 
 # Model
-model_name: "deepseek-ai/deepseek-coder-1.3b-instruct"
+model_name: "Qwen/Qwen2.5-1.5B-Instruct"
 
 # Quantization (bitsandbytes)
 quantization:
@@ -16,8 +16,7 @@ lora:
   r: 8  # Smaller rank for faster testing
   alpha: 16
   dropout: 0.1
-  target_modules: ["q_proj", "v_proj", "gate_proj", "up_proj"]  # Reduced for testing
-  dropout: 0.1
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
   bias: "none"
 
 # Training hyperparameters (MINIMAL for testing)
