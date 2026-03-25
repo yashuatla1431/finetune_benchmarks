@@ -26,6 +26,8 @@ def validate(model, loader, device):
 
     while not loader.batch_completed:
         x, y = loader.get_batch()
+        if x is None or y is None:
+            break
         x = x.to(device)
         y = y.to(device)
         output = model(x, labels=y)

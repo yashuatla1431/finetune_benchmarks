@@ -95,22 +95,27 @@ class ValLoader:
     def get_batch(self):
         """Get next validation batch."""
         chunk = self.batch_size * self.block_size
-        if not self.savez:
-            tokens_np = self.shard[self.pointer:self.pointer + chunk + 1]
-            self.pointer += chunk
 
+        if not self.savez:
+            # Check BEFORE getting batch if we have enough tokens
             if len(self.shard) - self.pointer < chunk + 1:
                 self.batch_completed = True
+                return None, None
+
+            tokens_np = self.shard[self.pointer:self.pointer + chunk + 1]
+            self.pointer += chunk
 
             x = torch.from_numpy(tokens_np[:-1]).view(self.batch_size, self.block_size)
             y = torch.from_numpy(tokens_np[1:]).view(self.batch_size, self.block_size)
         else:
+            # Check BEFORE getting batch if we have enough tokens
+            if len(self.shard['tokens']) - self.pointer < chunk + 1:
+                self.batch_completed = True
+                return None, None
+
             tokens_np = self.shard['tokens'][self.pointer:self.pointer + chunk + 1]
             labels_np = self.shard['labels'][self.pointer:self.pointer + chunk + 1]
             self.pointer += chunk
-
-            if len(self.shard['tokens']) - self.pointer < chunk + 1:
-                self.batch_completed = True
 
             x = torch.from_numpy(tokens_np[:-1]).view(self.batch_size, self.block_size)
             y = torch.from_numpy(labels_np[1:]).view(self.batch_size, self.block_size)
