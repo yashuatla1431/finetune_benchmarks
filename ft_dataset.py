@@ -6,7 +6,9 @@ from tqdm import tqdm
 model_name = "Qwen/Qwen2.5-1.5B-Instruct"
 enc = AutoTokenizer.from_pretrained(model_name)
 
-dataset = load_dataset("databricks/databricks-dolly-15k", split='train')
+# Load finance-alpaca and take first 20k examples
+dataset = load_dataset("gbharti/finance-alpaca", split='train')
+dataset = dataset.select(range(min(20000, len(dataset))))
 
 import numpy as np
 pbar = tqdm(total=len(dataset), desc="Rows processed")
@@ -30,18 +32,18 @@ def mask_train(tokens_ls):
 
 for obj in dataset:
     instruction = obj['instruction']
-    response = obj['response']
-    context = obj.get('context', '')
+    input_text = obj.get('input', '')
+    output = obj['output']
 
-    # Skip empty responses
-    if not response.strip():
+    # Skip empty outputs
+    if not output.strip():
         continue
 
-    # Format: instruction (with context if available) -> response
-    if context.strip():
-        train_exp = f"##Human:{instruction}\nContext:{context}\n\n##Response:{response}"
+    # Format: instruction + input -> output
+    if input_text.strip():
+        train_exp = f"##Human:{instruction}\nInput:{input_text}\n\n##Response:{output}"
     else:
-        train_exp = f"##Human:{instruction}\n\n##Response:{response}"
+        train_exp = f"##Human:{instruction}\n\n##Response:{output}"
 
     tokens_ls = enc.encode(train_exp, add_special_tokens=False)
     labels_ls = mask_train(tokens_ls)
